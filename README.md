@@ -1,8 +1,14 @@
 <h1 align="center">Beyond Relevance: Bayesian Evidence Acquisition for Agentic Whole-Slide Image Reasoning</h1>
 
 <p align="center">
-  <a href="#">
-    <img src="https://img.shields.io/badge/Paper-arXiv-b31b1b.svg" alt="arXiv">
+  <a href="https://github.com/bryanwong17/BEACON">
+    <img src="https://img.shields.io/badge/Project-Page-green.svg" alt="Project Page">
+  </a>
+  <a href="https://arxiv.org/abs/2608.05757">
+    <img src="https://img.shields.io/badge/arXiv-2608.05757-b31b1b.svg" alt="arXiv">
+  </a>
+  <a href="https://arxiv.org/pdf/2608.05757">
+    <img src="https://img.shields.io/badge/Paper-PDF-red.svg" alt="Paper PDF">
   </a>
 </p>
 
@@ -24,24 +30,23 @@ We propose **BEACON**, a **training-free, plug-and-play** agentic framework for 
 - Existing agentic frameworks assume semantically relevant patches are diagnostically informative, but competing diagnostic hypotheses often look alike, so **relevant patches are often not diagnostically informative**.
 - Relevance-driven retrieval can therefore waste its acquisition budget on redundant patches, without actually **reducing diagnostic uncertainty**.
 
-<p align="center">
-  <img src="figures/BEACON_Figure2.png" width="900">
-</p>
-
 ### Key Contributions
 
 - We formulate patch acquisition in agentic WSI reasoning as a **Bayesian evidence acquisition** problem: maintaining a belief over competing diagnostic hypotheses and acquiring evidence to **reduce diagnostic uncertainty**.
 - We propose **BEACON**, a **training-free**, **plug-and-play** agentic framework that performs **uncertainty-aware** patch acquisition by combining Bayesian belief estimation with expected information gain (EIG).
 - Across five zero-shot WSI-VQA benchmarks and diverse foundation-model backbones, BEACON achieves the **strongest overall performance** among training-free agentic frameworks while requiring substantially fewer acquisition rounds.
 
-### How BEACON Works
+<p align="center">
+  <img src="figures/BEACON_Figure2.png" width="900">
+</p>
 
-Each acquisition round runs a closed loop over four stages, shown above:
+
+### How BEACON Works
 
 1. **Coarse Candidate Retrieval**: a pathology VLM narrows the search space to a compact candidate pool based on the current retrieval query.
 2. **Belief Construction**: estimates a probabilistic belief over competing diagnostic hypotheses from the retrieved candidates.
 3. **Bayesian Evidence Acquisition**: scores candidates by expected information gain (EIG) and selects the patches expected to reduce diagnostic uncertainty the most.
-4. **Evidence Control**: decides whether the accumulated evidence is enough to answer, whether higher-resolution inspection is needed, or whether to keep exploring.
+4. **Evidence Control**: decides whether the accumulated evidence is enough to answer, whether to keep exploring, or whether higher-resolution inspection is needed.
 
 ## 🛠 1. Installation
 
@@ -58,7 +63,7 @@ pip install --no-deps git+https://github.com/aldraus/quilt-llava.git
 
 ## 2. Data Preparation
 
-Download MultiPathQA slides: see [GIANT: Downloading MultiPathQA Slides](https://github.com/KianWeihrauch/GIANT#-downloading-multipathqa-slides) section.
+Download MultiPathQA slides: see [GIANT: Downloading MultiPathQA Slides](https://github.com/KianWeihrauch/GIANT#-downloading-multipathqa-slides).
 
 Next, arrange the data into a data root with one folder per dataset (`tcga_slidebench`, `tcga_expert_vqa`, `tcga`, `gtex`, `panda`), laid out like this:
 
@@ -76,9 +81,11 @@ DATA_ROOT/
         └── ...
 ```
 
-- **`patches_output/`** (5x patch image tiles): see [PathAgent](https://github.com/G14nTDo4/PathAgent) [Section 2.1 (Patch Generation)](https://github.com/G14nTDo4/PathAgent#21-patch-generation).
-- **`desc/patches_descriptions.json`** (offline 5x patch descriptions): see [PathAgent](https://github.com/G14nTDo4/PathAgent) [Section 2.2 (Description Generation)](https://github.com/G14nTDo4/PathAgent#22-description-generation).
-- **Model checkpoints**: download from Hugging Face and place under a models root of your choice.
+- **`patches_output/`** (5x image patches): see [PathAgent: Section 2.1 (Patch Generation)](https://github.com/G14nTDo4/PathAgent#21-patch-generation).
+- **`desc/patches_descriptions.json`** (offline 5x patch descriptions): see [PathAgent: Section 2.2 (Description Generation)](https://github.com/G14nTDo4/PathAgent#22-description-generation).
+- **`img_features/`** (precomputed 5x VLM embeddings; saved as `img_features_conch/` when `VLM_BACKEND=conch`).
+
+Separately, download model checkpoints and place them under a `MODELS_ROOT/` of your choice:
 
   | Model | Hugging Face |
   |---|---|
@@ -88,8 +95,10 @@ DATA_ROOT/
   | PathGen-LLaVA | [jamessyx/PathGen-LLaVA](https://huggingface.co/jamessyx/PathGen-LLaVA) |
   | Qwen3-Reranker-4B | [Qwen/Qwen3-Reranker-4B](https://huggingface.co/Qwen/Qwen3-Reranker-4B) |
   | Qwen3-4B | [Qwen/Qwen3-4B](https://huggingface.co/Qwen/Qwen3-4B) |
-- **`img_features/`** (precomputed 5x VLM embeddings; saved as `img_features_conch/` when `VLM_BACKEND=conch`):
-  ```bash
+
+To extract precomputed 5x VLM embeddings:
+
+```bash
   export DATA_ROOT=/path/to/your/data/root
   export MODELS_ROOT=/path/to/your/models/root
 
@@ -97,7 +106,7 @@ DATA_ROOT/
   export DATASETS=tcga_slidebench   # tcga_slidebench, tcga_expert_vqa, tcga, gtex, panda
 
   bash run_extract_img_features.sh
-  ```
+```
 
 ## 3. Inference
 
@@ -146,9 +155,22 @@ Results are written to `$BASE_DIR/multipathqa_<dataset>/eval_summary.json`.
 ACC is reported for `tcga_slidebench` and `tcga_expert_vqa`.
 BACC is reported for `tcga`, `gtex`, and `panda`.
 
+## Citation
+
+If you find our work useful in your research, please consider starring 🌟 this repo and citing our [paper](https://arxiv.org/abs/2608.05757) at:
+
+```
+@article{wong2026beacon,
+  title={Beyond Relevance: Bayesian Evidence Acquisition for Agentic Whole-Slide Image Reasoning},
+  author={Wong, Bryan and Xu, Xun and Fu, Huazhu and Chen, Nancy F. and Yi, Mun Yong},
+  journal={arXiv preprint arXiv:2608.05757},
+  year={2026}
+}
+```
+
 ## Acknowledgements
 
-This project is based on [PathAgent](https://github.com/G14nTDo4/PathAgent), [GIANT](https://github.com/KianWeihrauch/GIANT/tree/main?tab=readme-ov-file), [PLIP](https://github.com/PathologyFoundation/plip), [CONCH](https://github.com/mahmoodlab/CONCH), [Patho-R1](https://github.com/wenchuan-zhang/patho-r1), [PathGen-LLaVA](https://github.com/PathFoundation/PathGen-1.6M). We sincerely thank the authors of these excellent works.
+This project is based on [PathAgent](https://github.com/G14nTDo4/PathAgent), [GIANT](https://github.com/KianWeihrauch/GIANT/tree/main?tab=readme-ov-file), [PLIP](https://github.com/PathologyFoundation/plip), [CONCH](https://github.com/mahmoodlab/CONCH), [Patho-R1](https://github.com/wenchuan-zhang/patho-r1), [PathGen-LLaVA](https://github.com/PathFoundation/PathGen-1.6M), and [Qwen](https://github.com/QwenLM). We sincerely thank the authors of these excellent works.
 
 ## Contact
 
