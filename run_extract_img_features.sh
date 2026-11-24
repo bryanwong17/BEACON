@@ -4,7 +4,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 source "$(conda info --base)/etc/profile.d/conda.sh"
-conda activate beacon
+conda activate discern
 
 export DATA_ROOT="${DATA_ROOT:?Set DATA_ROOT to your data root, e.g. /path/to/data}"
 export MODELS_ROOT="${MODELS_ROOT:?Set MODELS_ROOT to your models root, e.g. /path/to/models}"

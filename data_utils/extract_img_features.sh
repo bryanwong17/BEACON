@@ -6,9 +6,9 @@
 #   VLM_BACKEND=conch DATASETS="gtex panda" ./extract_img_features.sh
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BEACON_ROOT="$(dirname "$SCRIPT_DIR")"
-MODELS_ROOT="${MODELS_ROOT:-$BEACON_ROOT/models}"
-DATA_ROOT="${DATA_ROOT:-$BEACON_ROOT/data}"
+DISCERN_ROOT="$(dirname "$SCRIPT_DIR")"
+MODELS_ROOT="${MODELS_ROOT:-$DISCERN_ROOT/models}"
+DATA_ROOT="${DATA_ROOT:-$DISCERN_ROOT/data}"
 
 VLM_BACKEND="${VLM_BACKEND:-conch}"
 if [[ "$VLM_BACKEND" == "conch" ]]; then

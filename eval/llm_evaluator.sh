@@ -1,5 +1,5 @@
 #!/bin/bash
-# LLM-based evaluator for a BEACON results directory: infers the intended answer choice
+# LLM-based evaluator for a DISCERN results directory: infers the intended answer choice
 # from each free-form prediction, then scores it. See eval/llm_evaluator.py for the logic.
 #
 # Usage:
@@ -7,9 +7,9 @@
 # Prefer running via run_eval.sh, which also sets up the conda env and model paths.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BEACON_ROOT="${BEACON_ROOT:-$(dirname "$SCRIPT_DIR")}"
-BASE_DIR="${BASE_DIR:?Set BASE_DIR to the results directory to score, e.g. results/BEACON_PLIP_M25_B5_...}"
-QWEN_CKPT="${QWEN_CKPT:-${BEACON_ROOT}/models/Qwen3-4B}"
+DISCERN_ROOT="${DISCERN_ROOT:-$(dirname "$SCRIPT_DIR")}"
+BASE_DIR="${BASE_DIR:?Set BASE_DIR to the results directory to score, e.g. results/DISCERN_PLIP_M25_B5_...}"
+QWEN_CKPT="${QWEN_CKPT:-${DISCERN_ROOT}/models/Qwen3-4B}"
 
 SEED="${SEED:-128}"
 STRICT_DETERMINISM="${STRICT_DETERMINISM:-0}"
@@ -46,7 +46,7 @@ for dataset in "${DATASETS[@]}"; do
     continue
   fi
 
-  python "${BEACON_ROOT}/eval/llm_evaluator.py" \
+  python "${DISCERN_ROOT}/eval/llm_evaluator.py" \
     --results_dir "${RESULTS_DIR}" \
     --qwen_ckpt "${QWEN_CKPT}" \
     --max_new_tokens "${MAX_NEW_TOKENS}" \

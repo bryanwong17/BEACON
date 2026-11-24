@@ -1,4 +1,6 @@
-"""Frozen reranker: scores patch/hypothesis pairs for Belief Construction"""
+"""Frozen reranker: scores (caption d_x, answer statement a_k) pairs for Stage 2 (Eq. 2).
+
+The prompt wording ("hypothesis") is kept verbatim from the experiments so that results reproduce."""
 
 import re
 from typing import Dict, List, Optional
@@ -172,7 +174,7 @@ def _build_reranker_task(question: str) -> str:
     )
 
 
-def build_hypothesis_text(choice: str, question: str, choices: Optional[List[str]] = None) -> str:
+def build_statement_text(choice: str, question: str, choices: Optional[List[str]] = None) -> str:
     expanded_option_text = _expand_choice_text(choice, choices or [])
     if _is_negation_question(question):
         return (
@@ -252,7 +254,7 @@ def score_patch_descriptions(
     for pi, name in enumerate(scored):
         desc = descriptions[name].strip()
         for ci, choice in enumerate(choices):
-            hyp = build_hypothesis_text(choice, question, choices)
+            hyp = build_statement_text(choice, question, choices)
             all_pairs.append(_format_pair(task, desc, hyp))
             pair_index.append((pi, ci))
 
