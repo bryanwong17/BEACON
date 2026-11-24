@@ -1,7 +1,7 @@
-<h1 align="center">Resemblance Alone Is Not Evidence: Uncertainty-Guided Patch Acquisition for Agentic Whole-Slide Image Reasoning</h1>
+<h1 align="center">Beyond Relevance: Bayesian Evidence Acquisition for Agentic Whole-Slide Image Reasoning</h1>
 
 <p align="center">
-  <a href="https://github.com/bryanwong17/DISCERN">
+  <a href="https://github.com/bryanwong17/BEACON">
     <img src="https://img.shields.io/badge/Project-Page-green.svg" alt="Project Page">
   </a>
   <a href="https://arxiv.org/abs/2608.05757">
@@ -14,46 +14,48 @@
 
 ## 📣 Updates
 
-* **2026.11.24** — Released **DISCERN** (arXiv v2), formerly **BEACON** (arXiv v1).
 * **2026.08.06** — Released the initial code.
 
 ## 🚀 Overview
 
-Answering a diagnostic question about a gigapixel whole-slide image (WSI) requires an agent to decide which few of its thousands of patches to read. Existing training-free agents read the patches that best match the question, assuming that **a patch resembling the question is also evidence for answering it**. In pathology this often fails: competing diagnoses share morphology, so many patches match the question yet are equally consistent with several answer options.
-
-We propose **DISCERN**, a **training-free, plug-and-play** agent that keeps similarity as a fast **System 1** to shortlist candidate patches and adds a deliberate, uncertainty-guided **System 2** that reads the patches expected to **tell the options apart**, ranked by their **expected uncertainty reduction (EUR)**.
+We propose **BEACON**, a **training-free, plug-and-play** agentic framework for gigapixel whole-slide image visual question answering (WSI-VQA) that reformulates WSI reasoning as a **Bayesian evidence acquisition** problem, maintaining a probabilistic belief over competing diagnostic hypotheses and acquiring patches by **expected information gain (EIG)** rather than semantic relevance.
 
 <p align="center">
-  <img src="figures/DISCERN_Figure1.png" width="800">
+  <img src="figures/BEACON_Figure1.png" width="800">
 </p>
 
-### Highlights
+### Why BEACON?
 
-- **Similarity finds the region but cannot choose within it.** Vision-language similarity retrieves a shortlist that usually contains useful patches, but ranks them at chance level within it, even when an LLM rewrites the query.
-- **DISCERN** adds a System 2 that estimates an answer distribution from the captions of the shortlisted patches and acquires the patches with the highest EUR.
-- On five MultiPathQA benchmarks, DISCERN achieves the **highest average accuracy** among training-free agents with both a pathology MLLM and GPT-5, **cuts GPT-5 API cost by 47%** compared with PathAgent, and improves over existing agents across pathology, medical, and general-purpose MLLMs.
+- WSIs are **gigapixel in scale**, so an agent must **decide which patches to inspect** before it can answer a diagnostic question.
+- Existing agentic frameworks assume semantically relevant patches are diagnostically informative, but competing diagnostic hypotheses often look alike, so **relevant patches are often not diagnostically informative**.
+- Relevance-driven retrieval can therefore waste its acquisition budget on redundant patches, without actually **reducing diagnostic uncertainty**.
+
+### Key Contributions
+
+- We formulate patch acquisition in agentic WSI reasoning as a **Bayesian evidence acquisition** problem: maintaining a belief over competing diagnostic hypotheses and acquiring evidence to **reduce diagnostic uncertainty**.
+- We propose **BEACON**, a **training-free**, **plug-and-play** agentic framework that performs **uncertainty-aware** patch acquisition by combining Bayesian belief estimation with expected information gain (EIG).
+- Across five zero-shot WSI-VQA benchmarks and diverse foundation-model backbones, BEACON achieves the **strongest overall performance** among training-free agentic frameworks while requiring substantially fewer acquisition rounds.
 
 <p align="center">
-  <img src="figures/DISCERN_Figure2.png" width="900">
+  <img src="figures/BEACON_Figure2.png" width="900">
 </p>
 
-### How DISCERN Works
 
-Each round has four stages:
+### How BEACON Works
 
-1. **Coarse Candidate Retrieval (System 1)**: a pathology VLM shortlists the top-*M* patches most similar to the current query.
-2. **Answer Distribution Construction (System 2)**: a frozen reranker scores how strongly each candidate's offline caption supports each answer option; averaging over the pool gives the answer distribution.
-3. **Uncertainty-Guided Patch Acquisition (System 2)**: the top-*B* candidates by EUR are read by the MLLM.
-4. **Evidence Control**: an LLM controller decides whether to answer, zoom in for a missing detail, or continue with a refined query.
+1. **Coarse Candidate Retrieval**: a pathology VLM narrows the search space to a compact candidate pool based on the current retrieval query.
+2. **Belief Construction**: estimates a probabilistic belief over competing diagnostic hypotheses from the retrieved candidates.
+3. **Bayesian Evidence Acquisition**: scores candidates by expected information gain (EIG) and selects the patches expected to reduce diagnostic uncertainty the most.
+4. **Evidence Control**: decides whether the accumulated evidence is enough to answer, whether to keep exploring, or whether higher-resolution inspection is needed.
 
 ## 🛠 1. Installation
 
 ```bash
-git clone https://github.com/bryanwong17/DISCERN.git
-cd DISCERN
+git clone https://github.com/bryanwong17/BEACON.git
+cd BEACON
 
 conda env create -f environment.yml
-conda activate discern
+conda activate beacon
 
 pip install --no-deps git+https://github.com/Mahmoodlab/CONCH.git
 pip install --no-deps git+https://github.com/aldraus/quilt-llava.git
@@ -128,10 +130,10 @@ export QWEN_CKPT=$MODELS_ROOT/Qwen3-4B                  # if EVIDENCE_CONTROLLER
 # export OPENROUTER_API_KEY=sk-or-v1-...
 # export OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 
-bash run_discern.sh
+bash run_beacon.sh
 ```
 
-Results are written to `results/DISCERN_<VLM>_M<M>_B<B>_reranker_qwen3-<size>_perceptor_<perceptor>_controller_<controller>/multipathqa_<dataset>/`.
+Results are written to `results/BEACON_<VLM>_M<M>_B<B>_reranker_qwen3-<size>_perceptor_<perceptor>_controller_<controller>/multipathqa_<dataset>/`.
 
 ## 4. Evaluation
 
@@ -141,7 +143,7 @@ To avoid format-dependent mismatches and ensure consistent evaluation, we use an
 export MODELS_ROOT=/path/to/your/models/root  # same root as Section 3
 
 export DATASETS=tcga_slidebench  # tcga_slidebench, tcga_expert_vqa, tcga, gtex, panda
-export BASE_DIR=results/DISCERN_PLIP_M25_B5_reranker_qwen3-4B_perceptor_Patho-R1-7B_controller_Qwen3-4B  # results directory from Section 3
+export BASE_DIR=results/BEACON_PLIP_M25_B5_reranker_qwen3-4B_perceptor_Patho-R1-7B_controller_Qwen3-4B  # results directory from Section 3
 
 export QWEN_CKPT=$MODELS_ROOT/Qwen3-4B
 
@@ -158,8 +160,8 @@ BACC is reported for `tcga`, `gtex`, and `panda`.
 If you find our work useful in your research, please consider starring 🌟 this repo and citing our [paper](https://arxiv.org/abs/2608.05757) at:
 
 ```
-@article{wong2026discern,
-  title={Resemblance Alone Is Not Evidence: Uncertainty-Guided Patch Acquisition for Agentic Whole-Slide Image Reasoning},
+@article{wong2026beacon,
+  title={Beyond Relevance: Bayesian Evidence Acquisition for Agentic Whole-Slide Image Reasoning},
   author={Wong, Bryan and Xu, Xun and Fu, Huazhu and Chen, Nancy F. and Yi, Mun Yong},
   journal={arXiv preprint arXiv:2608.05757},
   year={2026}

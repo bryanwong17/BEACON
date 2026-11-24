@@ -1,4 +1,4 @@
-name: discern
+name: beacon
 channels:
   - conda-forge
   - defaults

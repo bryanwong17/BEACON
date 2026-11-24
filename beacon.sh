@@ -1,7 +1,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DISCERN_ROOT="$SCRIPT_DIR"
-MODELS_ROOT="${MODELS_ROOT:-$DISCERN_ROOT/models}"
-DATA_ROOT="${DATA_ROOT:-$DISCERN_ROOT/data}"
+BEACON_ROOT="$SCRIPT_DIR"
+MODELS_ROOT="${MODELS_ROOT:-$BEACON_ROOT/models}"
+DATA_ROOT="${DATA_ROOT:-$BEACON_ROOT/data}"
 
 SEED="${SEED:-128}"
 STRICT_DETERMINISM="${STRICT_DETERMINISM:-0}"
@@ -23,7 +23,7 @@ PATHO_R1_CKPT="${PATHO_R1_CKPT:-$MODELS_ROOT/Patho-R1-7B}"
 RERANKER_CKPT="${RERANKER_CKPT:-$MODELS_ROOT/Qwen3-Reranker-4B}"
 PATHGEN_LLAVA_CKPT="${PATHGEN_LLAVA_CKPT:-$MODELS_ROOT/PathGen-LLaVA}"
 PATHGEN_LLAVA_INPUT_SIZE="${PATHGEN_LLAVA_INPUT_SIZE:-1024}"
-QUESTIONS_FILE="$DISCERN_ROOT/MultiPathQA.csv"
+QUESTIONS_FILE="$BEACON_ROOT/MultiPathQA.csv"
 
 
 PERCEPTOR="${PERCEPTOR:-patho_r1}"
@@ -58,7 +58,7 @@ else
   CONTROLLER_LABEL="${OPENROUTER_CONTROLLER_MODEL//\//_}"
 fi
 
-RESULTS_DIR="results/DISCERN_${VLM_BACKEND^^}_M${VLM_FILTER_TOP_K}_B${PATCHES_PER_ROUND}_reranker_qwen3-${RERANKER_LABEL}_perceptor_${PERCEPTOR_LABEL}_controller_${CONTROLLER_LABEL}"
+RESULTS_DIR="results/BEACON_${VLM_BACKEND^^}_M${VLM_FILTER_TOP_K}_B${PATCHES_PER_ROUND}_reranker_qwen3-${RERANKER_LABEL}_perceptor_${PERCEPTOR_LABEL}_controller_${CONTROLLER_LABEL}"
 
 if [[ "$VLM_BACKEND" == "conch" ]]; then
   FEATURE_SUBDIR="img_features_conch"
@@ -114,20 +114,20 @@ fi
 for DATASET in "${DATASETS[@]}"
 do
     echo "========================================"
-    echo "Running DISCERN on dataset: $DATASET"
+    echo "Running BEACON on dataset: $DATASET"
     echo "Seed: $SEED  |  M=$VLM_FILTER_TOP_K  B=$PATCHES_PER_ROUND  T=$MAX_ROUNDS  reranker=$RERANKER_LABEL"
-    echo "Acquisition: top-B by EUR"
+    echo "Acquisition: top-B by EIG"
     echo "Results: $RESULTS_DIR/multipathqa_${DATASET}"
     echo "========================================"
 
-    python "$DISCERN_ROOT/discern.py" \
+    python "$BEACON_ROOT/beacon.py" \
         "${BACKEND_FLAGS[@]}" \
         --reranker_ckpt "$RERANKER_CKPT" \
         --descriptions_file "$DATA_ROOT/${DATASET}/desc/patches_descriptions.json" \
         --questions_file "$QUESTIONS_FILE" \
         --feature_dir "$DATA_ROOT/${DATASET}/${FEATURE_SUBDIR}" \
         --patch_root "$DATA_ROOT/${DATASET}/patches_output" \
-        --save_dir "$DISCERN_ROOT/${RESULTS_DIR}/multipathqa_${DATASET}" \
+        --save_dir "$BEACON_ROOT/${RESULTS_DIR}/multipathqa_${DATASET}" \
         --dataset_name "multipathqa_${DATASET}" \
         --plip_top_k "$VLM_FILTER_TOP_K" \
         --patches_per_round "$PATCHES_PER_ROUND" \
@@ -139,7 +139,7 @@ do
         "${STRICT_FLAG[@]}"
     PYTHON_EXIT_CODE=$?
     if [[ "$PYTHON_EXIT_CODE" -ne 0 ]]; then
-        echo "ERROR: discern.py failed for dataset '$DATASET' with exit code $PYTHON_EXIT_CODE" >&2
+        echo "ERROR: beacon.py failed for dataset '$DATASET' with exit code $PYTHON_EXIT_CODE" >&2
         OVERALL_EXIT_CODE="$PYTHON_EXIT_CODE"
     fi
 done

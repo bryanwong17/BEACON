@@ -8,7 +8,7 @@ def _ckpt_name(path: str) -> str:
 
 def print_run_banner(args: argparse.Namespace) -> None:
     print("=" * 40)
-    print("DISCERN: Uncertainty-Guided Patch Acquisition for Agentic WSI Reasoning")
+    print("BEACON: Bayesian Evidence Acquisition for WSI Reasoning")
     print(f"VLM backend:         {args.vlm_backend} ({args.vlm_ckpt})")
     print(f"Evidence controller: " + (
         f"{_ckpt_name(args.qwen_ckpt)} ({args.qwen_ckpt})" if args.evidence_controller == "qwen"
@@ -31,6 +31,6 @@ def print_run_banner(args: argparse.Namespace) -> None:
     print(f"Results to:          {args.save_dir}")
     print(
         f"Acquisition config: M={args.plip_top_k}, B={args.patches_per_round}, "
-        f"T={args.max_rounds}, rule=top-B by EUR"
+        f"T={args.max_rounds}, rule=top-B by EIG"
     )
     print("=" * 40)

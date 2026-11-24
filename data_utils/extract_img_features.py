@@ -8,13 +8,13 @@ from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-_DISCERN_ROOT = os.path.dirname(_THIS_DIR)
-if _DISCERN_ROOT not in sys.path:
-    sys.path.insert(0, _DISCERN_ROOT)
+_BEACON_ROOT = os.path.dirname(_THIS_DIR)
+if _BEACON_ROOT not in sys.path:
+    sys.path.insert(0, _BEACON_ROOT)
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Extract patch-level VLM features for DISCERN")
+    parser = argparse.ArgumentParser(description="Extract patch-level VLM features for BEACON")
 
     parser.add_argument("--vlm_backend", type=str, default="plip", choices=["plip", "conch"],
                         help="Which VLM to encode patches with.")

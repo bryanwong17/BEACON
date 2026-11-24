@@ -3,7 +3,7 @@ import os
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="DISCERN: uncertainty-guided patch acquisition for agentic WSI reasoning")
+    parser = argparse.ArgumentParser(description="BEACON: Bayesian Evidence Acquisition for WSI Reasoning")
 
     parser.add_argument("--vlm_backend", type=str, default="plip", choices=["plip", "conch"],
                         help="VLM backend for coarse candidate retrieval: 'plip' or 'conch'.")
@@ -55,11 +55,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--plip_top_k", type=int, default=25,
                         help="Coarse candidate pool size M.")
     parser.add_argument("--patches_per_round", type=int, default=5,
-                        help="Batch size B per acquisition round (top-B EUR selection).")
+                        help="Batch size B per acquisition round (top-B EIG selection).")
     parser.add_argument("--max_rounds", type=int, default=5,
                         help="Maximum acquisition rounds per case (T).")
     parser.add_argument("--prescreen_batch_size", type=int, default=4,
-                        help="Batch size for reranker scoring of answer statements.")
+                        help="Batch size for reranker hypothesis scoring.")
     parser.add_argument("--magnification", type=int, default=5,
                         help="Initial magnification level passed to the perceptor.")
     parser.add_argument("--patho_r1_input_size", type=int, default=1024,

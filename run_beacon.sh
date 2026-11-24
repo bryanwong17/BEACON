@@ -4,7 +4,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 source "$(conda info --base)/etc/profile.d/conda.sh"
-conda activate discern
+conda activate beacon
 
 export DATA_ROOT="${DATA_ROOT:?Set DATA_ROOT to your data root, e.g. /path/to/data}"
 export MODELS_ROOT="${MODELS_ROOT:?Set MODELS_ROOT to your models root, e.g. /path/to/models}"
@@ -27,4 +27,4 @@ export MAX_ROUNDS="${MAX_ROUNDS:-5}"                    # T: max acquisition rou
 # export OPENROUTER_API_KEY=sk-or-v1-...
 # export OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 
-bash "$SCRIPT_DIR/discern.sh"
+bash "$SCRIPT_DIR/beacon.sh"

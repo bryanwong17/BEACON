@@ -20,9 +20,9 @@ hf_logging.disable_progress_bar()
 hf_logging.set_verbosity_error()
 
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-_DISCERN_ROOT = os.path.dirname(_THIS_DIR)
-if _DISCERN_ROOT not in sys.path:
-    sys.path.insert(0, _DISCERN_ROOT)
+_BEACON_ROOT = os.path.dirname(_THIS_DIR)
+if _BEACON_ROOT not in sys.path:
+    sys.path.insert(0, _BEACON_ROOT)
 
 from data_utils.utils import make_unique_id
 from utils.json_utils import parse_json_loose
@@ -245,7 +245,7 @@ def score_one_file(
 # --------------------------------------------------------------------------
 
 # Benchmarks with a fixed class set are reported via balanced accuracy; the rest via
-# accuracy (see the paper, Sec. 4.1 and Supp. B.1).
+# accuracy (see beacon.tex, "Datasets and Evaluation").
 BACC_BENCHMARKS = {"gtex", "tcga", "panda"}
 
 
@@ -371,7 +371,7 @@ def evaluate_results(
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="LLM-based evaluator: standardize free-form DISCERN predictions into "
+        description="LLM-based evaluator: standardize free-form BEACON predictions into "
                      "MCQ choices, then score them."
     )
     parser.add_argument("--results_dir", type=str, required=True)

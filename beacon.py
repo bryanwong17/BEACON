@@ -46,10 +46,10 @@ from pipeline.evidence_controller import build_evidence_controller
 from models.perceptor import build_perceptor
 from utils.reproducibility import set_seed, configure_generation_defaults
 from utils.logging_utils import print_run_banner
-from pipeline.answer_distribution import build_answer_distribution, normalize_R_rows
+from pipeline.belief import aggregate_prior_from_R, normalize_R_rows
 from pipeline.retrieval import coarse_candidate_retrieval
 from models.reranker import prepare_runtime, score_candidates
-from pipeline.acquisition import select_top_b_by_eur
+from pipeline.acquisition import select_top_b_by_eig
 
 
 def main():
@@ -200,7 +200,7 @@ def main():
         queried_patch_names = []
         remaining_patch_names = list(all_patch_names)
         patches_to_evaluate_names = []
-        answer_dist = {}
+        belief = {}
 
         case_R_cache: Dict[str, Dict[str, float]] = {}
 
@@ -236,7 +236,7 @@ def main():
 
             num_to_select = min(args.patches_per_round, len(candidate_patch_names))
 
-            # Stage 2: Answer Distribution Construction
+            # Stage 2: Belief Construction
             uncached_names = [n for n in candidate_patch_names if n not in case_R_cache]
             if uncached_names:
                 new_R = score_candidates(
@@ -252,13 +252,13 @@ def main():
                 case_R_cache.update(normalize_R_rows(new_R, question_choices))
             R = {name: case_R_cache[name] for name in candidate_patch_names}
 
-            answer_dist = build_answer_distribution(R, question_choices)
+            belief = aggregate_prior_from_R(R, question_choices)
 
-            # Stage 3: Uncertainty-Guided Patch Acquisition (top-B by EUR)
-            patches_to_evaluate_names = select_top_b_by_eur(
+            # Stage 3: Bayesian evidence acquisition
+            patches_to_evaluate_names = select_top_b_by_eig(
                 candidate_patch_names,
                 R,
-                answer_dist,
+                belief,
                 question_choices,
                 batch_size=num_to_select,
             )
@@ -276,7 +276,7 @@ def main():
 
             print(
                 f"\nRound {attempt}/{max_attempts}: selected {len(patches_to_evaluate_names)} "
-                f"patches (top-B by EUR): {patches_to_evaluate_names}"
+                f"patches (top-B by EIG): {patches_to_evaluate_names}"
             )
 
             num_top_patches_to_describe = min(args.patches_per_round, len(patches_to_evaluate_names))
@@ -514,7 +514,7 @@ def main():
                 "plip_top_k_M": args.plip_top_k,
                 "patches_per_round_B": args.patches_per_round,
                 "max_rounds_T": args.max_rounds,
-                "acquisition_rule": "top_b_by_eur",
+                "acquisition_rule": "top_b_by_eig",
                 "perceptor_model": perceptor.model_name,
                 "evidence_controller_model": controller.model_name,
             },
